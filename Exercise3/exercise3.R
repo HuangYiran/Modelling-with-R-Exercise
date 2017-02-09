@@ -69,3 +69,64 @@ ggplot(taste.centers, aes(x = Body, y = Smoky,
                           label = rownames(taste.centers))) +
   geom_point() +
   geom_label(size = 10)
+
+
+###########Seite 31: arules
+library("arules")
+shopping.data = read.transactions("../Dataset/scottish-supermarket.csv", format = "basket", sep = ",", skip = 1)
+str(shopping.data)
+inspect(shopping.data[1:5])
+itemFrequencyPlot(shopping.data, topN = 10, type = "absolute")
+rules = apriori(shopping.data, parameter = list(supp = 0.001, conf = 0.8))
+str(rules)
+inspect(rules[1:5])
+
+###########Seite 34: Task
+summary(shopping.data)
+shopping.data = read.transactions("../Dataset/scottish-supermarket.csv", format = "basket", sep = ",", rm.duplicates = FALSE, skip = 1)
+rules1 = apriori(shopping.data,
+                 parameter = list(supp = 0.001, conf = 0.01),
+                 appearance = list(default = "lhs", rhs = "whisky"),
+                 control = list(verbose = F))
+summary(rules1)
+rules1 = sort(rules1, decreasing = TRUE, by = "confidence")
+inspect(rules1)
+rules2 = apriori(shopping.data,
+                 parameter = list(supp = 0.001, conf = 0.01),
+                 appearance = list(default = "rhs", lhs = c("liquor","whisky")),
+                 control = list(verbose = F))
+summary(rules2)
+inspect(rules2[1:7]) #schlecht Ergebnis
+library("grid")
+library("arulesViz")
+plot(rules1)
+plot(rules1, method = "graph", interactive = TRUE, shading = NA)
+
+###########Seite 43: CART
+library(rpart)
+fit = rpart(Species~., data = iris)
+predictions = predict(fit, iris[,1:4], type = "class")
+table(predictions, iris$Species)
+
+###########Seite 44:C5.0
+library(C50)
+fit = C5.0(Species~., data = iris)
+predictions = predict(fit, iris[,1:4])
+table(predictions, iris$Species)
+summary(fit)
+
+library(randomForest)
+fit = randomForest(Species~., data = iris)
+predictions = predict(fit, iris[,1:4])
+table(predictions, iris$Species)
+
+###########Seite 46:Task
+data.scotch = read.csv("../Dataset/scotch.csv")
+str(data.scotch)
+library(rpart)
+fit = rpart(region~., data = data.scotch) #dauert zu lange
+library(C50)
+fit = C5.0(region~., data = data.scotch)
+predictions = predict(fit, data.scotch[,-73])
+table(predictions, data.scotch[,73])
+summary(fit)
